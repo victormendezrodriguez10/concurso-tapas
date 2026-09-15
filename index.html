@@ -597,8 +597,11 @@ function renderRecuperar(){
   const cont = $("#lista-recuperar");
   const ps = lista().filter(p => p.id !== yo);
   if (!ps.length) { cont.innerHTML = `<p class="small muted">No hay inscripciones que recuperar.</p>`; return; }
-  cont.innerHTML = ps.map(p => `<div class="persona"><span><b>${esc(p.nombre)}</b>${fase() === "inscripcion" ? "" : ` <span class="muted small">· ${esc(p.plato)}</span>`}</span>
-    <span class="fila"><input type="tel" inputmode="numeric" maxlength="4" placeholder="PIN" style="width:74px;padding:6px 8px" id="rec-${p.id}" aria-label="PIN de ${esc(p.nombre)}"><button class="btn-sec btn-peq" type="button" data-rec="${p.id}">Soy yo</button></span></div>`).join("");
+  // Conserva lo que se estuviera tecleando si la lista se redibuja por un cambio en la nube
+  const tecleado = {}; cont.querySelectorAll("input[id^=rec-]").forEach(i => { if (i.value) tecleado[i.id] = i.value; });
+  // El nombre del plato solo se muestra junto al autor cuando los resultados ya son públicos
+  cont.innerHTML = ps.map(p => `<div class="persona"><span><b>${esc(p.nombre)}</b>${resultadosAbiertos() ? ` <span class="muted small">· ${esc(p.plato)}</span>` : ""}</span>
+    <span class="fila"><input type="tel" inputmode="numeric" maxlength="4" placeholder="PIN" style="width:74px;padding:6px 8px" id="rec-${p.id}" value="${esc(tecleado["rec-" + p.id] || "")}" aria-label="PIN de ${esc(p.nombre)}"><button class="btn-sec btn-peq" type="button" data-rec="${p.id}">Soy yo</button></span></div>`).join("");
   cont.querySelectorAll("[data-rec]").forEach(b => b.addEventListener("click", () => {
     const id = b.dataset.rec, pin = $("#rec-" + id).value.trim();
     if (pin !== D.participantes[id].pin) return toast("Ese PIN no coincide.");
@@ -626,6 +629,7 @@ function render(){
   const m = $("#modo"); m.className = "modo " + (nube ? "nube" : "");
   m.innerHTML = `<i></i>${nube ? "Conectado" : "Modo local (solo este móvil)"}`;
   $("#aviso-local").hidden = !!nube;
+  if (!nube) $("#aviso-local").textContent = "Esta copia está en modo local: lo que se inscriba aquí solo se guarda en este navegador. Para que cada amigo use su móvil hay que pegar la configuración de Firebase en el archivo (ver LEEME.md).";
 
   // Inscripción
   const mostrarForm = !mio || editando;
@@ -753,8 +757,11 @@ function renderResultados(){
       <div class="detalle">${CRITERIOS.map(c => `<div class="barra"><span>${c.n}</span><i><b style="width:${p.medias[c.k]*10}%"></b></i><span class="v">${f1(p.medias[c.k])}</span></div>`).join("")}</div>
     </div>`).join("");
   $("#categorias").innerHTML = CRITERIOS.map(c => {
-    const best = [...r].sort((a,b) => b.medias[c.k] - a.medias[c.k])[0];
-    return `<div class="cat"><div class="label">Mejor ${c.n.toLowerCase()}</div><div class="q">${esc(best.nombre)}</div><div class="w">${esc(best.plato)} · ${f1(best.medias[c.k])}</div></div>`;
+    const max = Math.max(...r.map(p => p.medias[c.k]));
+    const mejores = r.filter(p => Math.abs(p.medias[c.k] - max) < 0.001);
+    const nombres = mejores.map(p => esc(p.nombre)).join(" y ");
+    const platos = mejores.length === 1 ? esc(mejores[0].plato) : "Empate";
+    return `<div class="cat"><div class="label">Mejor ${c.n.toLowerCase()}</div><div class="q">${nombres}</div><div class="w">${platos} · ${f1(max)}</div></div>`;
   }).join("");
 }
 
@@ -775,7 +782,7 @@ function renderAnfitrion(){
   $("#anf-publicar").textContent = completos < ps.length ? `Publicar resultados (faltan ${ps.length - completos})` : "Publicar resultados";
   $("#anf-atras").hidden = f === "inscripcion";
   $("#anf-atras").textContent = f === "cata" ? "Volver a inscripción (oculta las tapas)" : "Volver a la cata (oculta los resultados)";
-  $("#anf-lista").innerHTML = lista().map(p => `<div class="persona"><span><b>${esc(p.nombre)}</b> <span class="muted small">· ${esc(p.plato)}</span></span><button class="btn-sec btn-peq" type="button" data-del="${p.id}">${confirmarPendiente === "del:" + p.id ? "¿Seguro? Toca otra vez" : "Eliminar"}</button></div>`).join("") || `<p class="small muted">Nadie inscrito.</p>`;
+  $("#anf-lista").innerHTML = lista().map(p => `<div class="persona"><span><b>${esc(p.nombre)}</b>${f === "resultados" ? ` <span class="muted small">· ${esc(p.plato)}</span>` : ""}</span><button class="btn-sec btn-peq" type="button" data-del="${p.id}">${confirmarPendiente === "del:" + p.id ? "¿Seguro? Toca otra vez" : "Eliminar"}</button></div>`).join("") || `<p class="small muted">Nadie inscrito.</p>`;
   $("#anf-lista").querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", async () => {
     const id = b.dataset.del;
     if (confirmarPendiente !== "del:" + id) { confirmarPendiente = "del:" + id; renderAnfitrion(); setTimeout(() => { if (confirmarPendiente === "del:" + id) { confirmarPendiente = null; renderAnfitrion(); } }, 4000); return; }
@@ -822,7 +829,15 @@ $("#btn-compartir").addEventListener("click", async () => {
   setInterval(() => { if (plazoVencido() && !$("#insc-cerrada") && !(yo && D.participantes[yo])) render(); }, 60000);
   $("#dato-fecha").innerHTML = esc(EVENTO.fecha) + (EVENTO.hora ? `<br><span class="muted" style="font-weight:400">${esc(EVENTO.hora)}</span>` : "");
   try { almacen = FIREBASE_CONFIG ? await crearAlmacenNube(FIREBASE_CONFIG) : crearAlmacenLocal(); }
-  catch(e){ toast("No se pudo conectar con la nube. Usando modo local."); almacen = crearAlmacenLocal(); }
+  catch(e){
+    // Si hay configuración de nube pero no se puede cargar, no se pasa a modo local a escondidas:
+    // lo que alguien inscribiera ahí se perdería. Mejor avisar y pedir recargar.
+    const a = $("#aviso-local"); a.hidden = false;
+    a.innerHTML = `No se ha podido conectar con la base de datos del concurso. Comprueba la conexión y <button class="btn-lin btn-peq" type="button" style="padding:0" onclick="location.reload()">recarga la página</button>.`;
+    $("#modo").innerHTML = `<i style="background:var(--pimenton)"></i>Sin conexión`;
+    document.querySelectorAll("form button[type=submit]").forEach(b => b.disabled = true);
+    return;
+  }
   almacen.suscribir(d => { D = d; render(); });
   const h = location.hash.replace("#",""); if (["normas","platos","votar","resultados"].includes(h)) irA(h);
 })();
