@@ -245,7 +245,7 @@
       <h2>Las normas</h2>
       <ol class="normas">
         <li><span class="n">1</span><div><b>Sin tapa no hay entrada.</b> Solo viene quien trae la suya, hecha de casa: solo puede faltarle calentarla y emplatarla. Aquí hay horno y microondas, no cocina para empezar de cero.</div></li>
-        <li><span class="n">2</span><div><b>Inscribe tu plato aquí antes del jueves 17 a las 23:59</b> con tu nombre, cómo lo presentas y una foto. Después se cierra la inscripción para saber cuántas tapas hay que preparar. Las tapas quedan en secreto: nadie las ve hasta que el anfitrión dé comienzo al concurso.</div></li>
+        <li><span class="n">2</span><div><b>Inscribe tu plato aquí antes del jueves 17 a las 23:59</b> con tu nombre y cómo lo presentas. La foto la puedes subir después, cuando lo tengas hecho. Después del jueves se cierra la inscripción para saber cuántas tapas hay que preparar. Las tapas quedan en secreto: nadie las ve hasta que el anfitrión dé comienzo al concurso.</div></li>
         <li><span class="n">3</span><div><b>La votación es anónima.</b> Cuando empiece la cata, cada persona puntúa todos los platos menos el suyo. Nadie ve qué nota ha puesto cada cual ni de quién es cada tapa.</div></li>
         <li><span class="n">4</span><div><b>Cuando todo el mundo haya votado,</b> el anfitrión publica los resultados: nombres, medias y la tapa ganadora.</div></li>
         <li><span class="n">5</span><div><b>Hay premio para la tapa ganadora.</b></div></li>
@@ -296,11 +296,12 @@
           <span class="ayuda">Esto es lo que verán los demás antes de votar. No pongas tu nombre aquí si quieres mantener el misterio.</span>
         </div>
         <div class="campo">
-          <label for="f-foto">Foto del plato (obligatoria)</label>
+          <label for="f-foto">Foto del plato</label>
           <div class="foto-zona">
             <div class="foto-prev" id="foto-prev">Sin foto todavía</div>
             <input type="file" id="f-foto" accept="image/*">
           </div>
+          <span class="ayuda">Si aún no la tienes, inscríbete sin foto y súbela cuando la prepares, incluso el mismo sábado.</span>
         </div>
         <div class="campo">
           <label for="f-pin">PIN de 4 cifras</label>
@@ -324,6 +325,10 @@
         <span class="chip tuyo">Inscrita</span>
       </div>
       <div id="mi-plato" style="margin-top:12px"></div>
+      <div class="aviso" id="sin-foto" hidden style="margin-top:12px">
+        <b>Tu tapa aún no tiene foto.</b> Súbela cuando la tengas emplatada, aunque sea el mismo sábado antes de empezar.
+        <div style="margin-top:8px"><input type="file" id="foto-rapida" accept="image/*" aria-label="Subir foto de tu tapa"></div>
+      </div>
       <p class="small muted" style="margin:12px 0 0">Tu tapa está guardada y este móvil te recordará el día del concurso: abre este mismo enlace y podrás votar directamente. Si entras desde otro móvil, recupera tu perfil con tu nombre y tu PIN.</p>
       <div class="fila" style="margin-top:12px">
         <button class="btn-sec btn-peq" type="button" id="btn-editar">Editar mi tapa</button>
@@ -597,7 +602,6 @@ $("#form-insc").addEventListener("submit", async e => {
   const id = editando ? yo : uid();
   const previo = editando ? D.participantes[yo] : null;
   const p = { nombre, plato, desc, pin, foto: fotoActual || (previo && previo.foto) || "", creado: previo ? previo.creado : Date.now() };
-  if (!p.foto) { $("#f-foto").focus(); return toast("Añade una foto de tu tapa para inscribirla."); }
   const btn = $("#btn-inscribir"); btn.disabled = true;
   try {
     await almacen.guardarParticipante(id, p);
@@ -607,6 +611,17 @@ $("#form-insc").addEventListener("submit", async e => {
     render();
   } catch(err){ toast("No se pudo guardar: " + err.message); }
   btn.disabled = false;
+});
+
+/* Subida rápida de la foto desde "Tu tapa", sin pasar por el formulario */
+$("#foto-rapida").addEventListener("change", async e => {
+  const f = e.target.files[0]; if (!f || !yo || !D.participantes[yo]) return;
+  try {
+    const foto = await reducirFoto(f);
+    await almacen.guardarParticipante(yo, {...D.participantes[yo], foto});
+    toast("Foto guardada. ¡Qué buena pinta!");
+  } catch(err){ toast("No se pudo subir la foto: " + err.message); }
+  e.target.value = "";
 });
 
 function rellenarFormulario(p){
@@ -668,7 +683,7 @@ function render(){
     if (!$("#insc-cerrada")) $("#insc-titulo").insertAdjacentHTML("afterend", `<p class="aviso rojo" id="insc-cerrada">${fase() !== "inscripcion" ? "El concurso ya ha empezado y las inscripciones están cerradas." : `El plazo de inscripción terminó el ${esc(EVENTO.cierreTexto)}.`} Si ya te habías inscrito, recupera tu inscripción más abajo.</p>`);
   } else { $("#form-insc").hidden = false; const a = $("#insc-cerrada"); if (a) a.remove(); }
   $("#insc-plazo").hidden = editando || inscripcionCerrada();
-  if (mio && !editando) $("#mi-plato").innerHTML = tarjetaPlato({...mio});
+  if (mio && !editando) { $("#mi-plato").innerHTML = tarjetaPlato({...mio}); $("#sin-foto").hidden = !!mio.foto; }
   renderRecuperar();
 
   // Lista de platos: oculta hasta que el anfitrión empieza el concurso; anónima hasta los resultados
@@ -870,7 +885,7 @@ function renderAnfitrion(){
   $("#anf-publicar").textContent = completos < ps.length ? `Publicar resultados (faltan ${ps.length - completos})` : "Publicar resultados";
   $("#anf-atras").hidden = f === "inscripcion";
   $("#anf-atras").textContent = f === "cata" ? "Volver a inscripción (oculta las tapas)" : "Volver a la cata (oculta los resultados)";
-  $("#anf-lista").innerHTML = lista().map(p => `<div class="persona"><span><b>${esc(p.nombre)}</b>${f === "resultados" ? ` <span class="muted small">· ${esc(p.plato)}</span>` : ""}</span><button class="btn-sec btn-peq" type="button" data-del="${p.id}">${confirmarPendiente === "del:" + p.id ? "¿Seguro? Toca otra vez" : "Eliminar"}</button></div>`).join("") || `<p class="small muted">Nadie inscrito.</p>`;
+  $("#anf-lista").innerHTML = lista().map(p => `<div class="persona"><span><b>${esc(p.nombre)}</b>${f === "resultados" ? ` <span class="muted small">· ${esc(p.plato)}</span>` : ""}${p.foto ? "" : ` <span class="chip pend">sin foto</span>`}</span><button class="btn-sec btn-peq" type="button" data-del="${p.id}">${confirmarPendiente === "del:" + p.id ? "¿Seguro? Toca otra vez" : "Eliminar"}</button></div>`).join("") || `<p class="small muted">Nadie inscrito.</p>`;
   $("#anf-lista").querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", async () => {
     const id = b.dataset.del;
     if (confirmarPendiente !== "del:" + id) { confirmarPendiente = "del:" + id; renderAnfitrion(); setTimeout(() => { if (confirmarPendiente === "del:" + id) { confirmarPendiente = null; renderAnfitrion(); } }, 4000); return; }
