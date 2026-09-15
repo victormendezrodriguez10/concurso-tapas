@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Flyer · Tapas en Vinateros</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Caveat:wght@500;700&family=Nunito+Sans:wght@400;600;800&display=swap">
+<style>
+  :root{
+    --pizarra:#232a26; --pizarra-2:#2c3530; --linea:#4a564e;
+    --tiza:#f1ebdf; --tiza-2:#b9bfb4; --pimenton:#e2552f; --azafran:#efb63b; --aceituna:#8fae66;
+    --fd:"Alfa Slab One",serif; --fb:"Nunito Sans",sans-serif; --fh:"Caveat",cursive;
+  }
+  html,body{margin:0; background:#000}
+  .lienzo{
+    position:relative; overflow:hidden; box-sizing:border-box;
+    background:var(--pizarra); color:var(--tiza); font-family:var(--fb);
+    background-image:
+      radial-gradient(ellipse at 15% 0%, rgba(255,255,255,.07), transparent 50%),
+      radial-gradient(ellipse at 95% 100%, rgba(226,85,47,.16), transparent 50%),
+      radial-gradient(ellipse at 60% 50%, rgba(239,182,59,.05), transparent 60%);
+  }
+  .marco{position:absolute; inset:26px; border:3px dashed var(--linea); border-radius:18px; pointer-events:none}
+  .eyebrow{font-family:var(--fh); color:var(--azafran); line-height:1; transform:rotate(-2deg); display:inline-block}
+  h1{font-family:var(--fd); font-weight:400; margin:0; line-height:.98; letter-spacing:.01em}
+  h1 em{font-style:normal; color:var(--pimenton)}
+  .dir{color:var(--tiza-2); font-weight:600}
+  .dir b{color:var(--tiza); font-weight:800}
+  .tags{display:flex; flex-wrap:wrap; gap:10px}
+  .tag{border:2px solid var(--linea); border-radius:999px; padding:6px 16px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--tiza-2)}
+  .tag.on{border-color:var(--azafran); color:var(--azafran)}
+  .cta{display:inline-block; background:var(--pimenton); color:#fff; font-weight:800; border-radius:12px; padding:14px 26px}
+  .nota{font-family:var(--fh); color:var(--tiza-2); line-height:1.1}
+  .plato{position:absolute; border-radius:50%; border:3px solid var(--linea); opacity:.55}
+  .plato::after{content:""; position:absolute; inset:14%; border-radius:50%; border:2px dashed var(--linea)}
+  .oliva{position:absolute}
+
+  /* Horizontal 1200×630 (vista previa de WhatsApp) */
+  .h{width:1200px; height:630px; padding:70px 80px}
+  .h .eyebrow{font-size:44px; margin-bottom:10px}
+  .h h1{font-size:96px; max-width:760px}
+  .h .dir{font-size:26px; margin-top:22px}
+  .h .tags{margin-top:30px; max-width:860px}
+  .h .tag{font-size:15px}
+  .h .cta{position:absolute; right:80px; bottom:74px; font-size:24px}
+  .h .nota{position:absolute; right:84px; top:70px; font-size:36px; text-align:right; max-width:330px; transform:rotate(2deg)}
+  .h .plato{width:420px; height:420px; right:-90px; bottom:-140px}
+  .h .oliva{right:150px; bottom:150px; width:150px}
+
+  /* Vertical 1080×1350 (para mandar como foto) */
+  .v{width:1080px; height:1350px; padding:110px 90px}
+  .v .eyebrow{font-size:64px; margin-bottom:16px}
+  .v h1{font-size:132px}
+  .v .dir{font-size:36px; margin-top:34px}
+  .v .tags{margin-top:44px}
+  .v .tag{font-size:21px; padding:10px 22px}
+  .v .cta{font-size:34px; margin-top:60px; padding:20px 36px}
+  .v .nota{font-size:52px; margin-top:34px; max-width:800px; transform:rotate(-1deg)}
+  .v .plato{width:560px; height:560px; right:-170px; bottom:-200px}
+  .v .oliva{right:160px; bottom:130px; width:200px}
+</style>
+</head>
+<body>
+<div class="lienzo h" id="h">
+  <div class="marco"></div>
+  <span class="eyebrow">Sábado 26 de septiembre</span>
+  <h1>Concurso de <em>tapas</em> en Vinateros</h1>
+  <p class="dir"><b>Calle Vinateros, 2</b> · Arganda del Rey</p>
+  <div class="tags">
+    <span class="tag on">Presentación</span><span class="tag on">Sabor</span><span class="tag on">Creatividad</span><span class="tag on">Ingredientes</span><span class="tag on">Conjunto</span>
+  </div>
+  <p class="nota">Tráela hecha de casa, aquí solo se calienta y se emplata</p>
+  <span class="cta">Inscribe tu tapa y vota →</span>
+  <div class="plato"></div>
+  <svg class="oliva" viewBox="0 0 150 150" fill="none" stroke-linecap="round">
+    <line x1="25" y1="135" x2="118" y2="22" stroke="#f1ebdf" stroke-width="6"/>
+    <ellipse cx="72" cy="80" rx="26" ry="20" transform="rotate(-50 72 80)" fill="#8fae66" stroke="#5f7a44" stroke-width="4"/>
+    <circle cx="72" cy="80" r="6" fill="#e2552f"/>
+    <circle cx="118" cy="22" r="9" fill="#efb63b"/>
+  </svg>
+</div>
+
+<div class="lienzo v" id="v">
+  <div class="marco"></div>
+  <span class="eyebrow">Sábado 26 de septiembre</span>
+  <h1>Concurso de <em>tapas</em> en Vinateros</h1>
+  <p class="dir"><b>Calle Vinateros, 2</b> · Arganda del Rey</p>
+  <p class="nota">Tráela hecha de casa: aquí solo se calienta y se emplata. Votación anónima, gana la mejor media.</p>
+  <div class="tags">
+    <span class="tag on">Presentación</span><span class="tag on">Sabor</span><span class="tag on">Creatividad</span><span class="tag on">Ingredientes</span><span class="tag on">Conjunto</span>
+  </div>
+  <span class="cta">Inscribe tu tapa en el enlace →</span>
+  <div class="plato"></div>
+  <svg class="oliva" viewBox="0 0 150 150" fill="none" stroke-linecap="round">
+    <line x1="25" y1="135" x2="118" y2="22" stroke="#f1ebdf" stroke-width="6"/>
+    <ellipse cx="72" cy="80" rx="26" ry="20" transform="rotate(-50 72 80)" fill="#8fae66" stroke="#5f7a44" stroke-width="4"/>
+    <circle cx="72" cy="80" r="6" fill="#e2552f"/>
+    <circle cx="118" cy="22" r="9" fill="#efb63b"/>
+  </svg>
+</div>
+<script>
+  // ?solo=h o ?solo=v deja un único lienzo para la captura
+  const solo = new URLSearchParams(location.search).get("solo");
+  if (solo) { document.getElementById(solo === "h" ? "v" : "h").remove(); document.body.style.overflow = "hidden"; }
+</script>
+</body>
+</html>
