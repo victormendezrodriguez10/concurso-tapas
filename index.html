@@ -273,6 +273,7 @@
         <span class="chip tuyo">Inscrita</span>
       </div>
       <div id="mi-plato" style="margin-top:12px"></div>
+      <p class="small muted" style="margin:12px 0 0">Tu tapa está guardada y este móvil te recordará el día del concurso: abre este mismo enlace y podrás votar directamente. Si entras desde otro móvil, recupera tu perfil con tu nombre y tu PIN.</p>
       <div class="fila" style="margin-top:12px">
         <button class="btn-sec btn-peq" type="button" id="btn-editar">Editar</button>
         <button class="btn-lin btn-peq" type="button" id="btn-salir">Cambiar de persona</button>
@@ -538,7 +539,7 @@ $("#form-insc").addEventListener("submit", async e => {
     await almacen.guardarParticipante(id, p);
     yo = id; localStorage.setItem("tapas.vinateros.yo", id);
     editando = false; fotoActual = null;
-    toast(previo ? "Cambios guardados" : "¡Tapa inscrita! Ya puedes votar cuando empiece la cata.");
+    toast(previo ? "Cambios guardados" : "¡Tapa inscrita! Este móvil te recordará el día del concurso.");
     render();
   } catch(err){ toast("No se pudo guardar: " + err.message); }
   btn.disabled = false;
@@ -580,7 +581,8 @@ function render(){
   if (!mio && yo) { yo = null; localStorage.removeItem("tapas.vinateros.yo"); }
 
   // Barra "yo"
-  $("#yo-texto").innerHTML = mio ? `Eres <b>${esc(mio.nombre)}</b>` : "Todavía no te has inscrito.";
+  $("#yo-texto").innerHTML = mio ? `Eres <b>${esc(mio.nombre)}</b>` : `Todavía no te has inscrito en este móvil. <button class="btn-lin btn-peq" type="button" id="btn-ir-recuperar" style="padding:0">¿Ya lo hiciste? Recupera tu perfil</button>`;
+  const irRec = $("#btn-ir-recuperar"); if (irRec) irRec.addEventListener("click", () => { irA("platos"); $("#det-recuperar").open = true; $("#det-recuperar").scrollIntoView({behavior:"smooth", block:"start"}); });
   const nube = almacen && almacen.modo === "nube";
   const m = $("#modo"); m.className = "modo " + (nube ? "nube" : "");
   m.innerHTML = `<i></i>${nube ? "Conectado" : "Modo local (solo este móvil)"}`;
