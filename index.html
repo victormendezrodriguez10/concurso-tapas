@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tapas en Vinateros</title>
+<meta name="description" content="Concurso de tapas en casa: inscribe tu plato, vota de forma anónima y descubre al ganador.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Caveat:wght@500;700&family=Nunito+Sans:ital,wght@0,400;0,600;0,800;1,400&display=swap">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23232a26'/%3E%3Ccircle cx='32' cy='32' r='20' fill='%23f1ebdf'/%3E%3Ccircle cx='32' cy='32' r='9' fill='%23e2552f'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --pizarra:#232a26; --pizarra-2:#2c3530; --pizarra-3:#36413a; --linea:#4a564e;
+    --tiza:#f1ebdf; --tiza-2:#b9bfb4; --tiza-3:#88918a;
+    --pimenton:#e2552f; --pimenton-2:#f07a58; --azafran:#efb63b; --aceituna:#8fae66; --aceituna-2:#5f7a44;
+    --radius:10px; --gutter:18px;
+    --fd:"Alfa Slab One","Rockwell","Georgia",serif;
+    --fb:"Nunito Sans","Segoe UI",system-ui,sans-serif;
+    --fh:"Caveat","Segoe Print","Comic Sans MS",cursive;
+    color-scheme: dark;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:var(--pizarra); color:var(--tiza); font-family:var(--fb); font-size:16px; line-height:1.5;
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(255,255,255,.06), transparent 55%),
+      radial-gradient(ellipse at 90% 100%, rgba(226,85,47,.10), transparent 50%);
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--azafran)}
+  .app{max-width:640px; margin:0 auto; padding:0 var(--gutter); padding-block:0 calc(84px + env(safe-area-inset-bottom,0px)); min-height:100%}
+
+  /* Cabecera */
+  .cabecera{padding-block:22px 10px; border-bottom:2px dashed var(--linea); margin-bottom:18px}
+  .eyebrow{font-family:var(--fh); font-size:1.45rem; color:var(--azafran); line-height:1; transform:rotate(-2deg); display:inline-block}
+  h1{font-family:var(--fd); font-weight:400; font-size:clamp(2rem,9vw,3rem); line-height:1.02; margin:.15em 0 .2em; letter-spacing:.01em; text-wrap:balance}
+  h1 em{font-style:normal; color:var(--pimenton)}
+  .sub{color:var(--tiza-2); margin:0; font-size:.95rem}
+  .sub strong{color:var(--tiza)}
+
+  h2{font-family:var(--fd); font-weight:400; font-size:1.5rem; margin:0 0 .5em; line-height:1.15; text-wrap:balance}
+  h3{font-size:1.05rem; font-weight:800; margin:0 0 .35em}
+  p{margin:0 0 .8em}
+  .muted{color:var(--tiza-2)}
+  .small{font-size:.86rem}
+  .label{font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--tiza-3); font-weight:800}
+
+  /* Bloques */
+  .bloque{background:var(--pizarra-2); border:1px solid var(--linea); border-radius:var(--radius); padding:18px; margin-bottom:16px}
+  .bloque.plano{background:transparent; border-style:dashed}
+  .aviso{border-left:4px solid var(--azafran); background:rgba(239,182,59,.08); padding:12px 14px; border-radius:6px; margin-bottom:14px}
+  .aviso.rojo{border-color:var(--pimenton); background:rgba(226,85,47,.10)}
+
+  /* Normas */
+  .normas{list-style:none; padding:0; margin:0; display:grid; gap:12px}
+  .normas li{display:grid; grid-template-columns:34px 1fr; gap:12px; align-items:start}
+  .normas .n{font-family:var(--fd); color:var(--pimenton); font-size:1.4rem; line-height:1.1}
+  .criterios{display:grid; gap:8px; margin:0; padding:0; list-style:none}
+  .criterios li{display:grid; grid-template-columns:1fr auto; gap:10px; padding:8px 0; border-bottom:1px dashed var(--linea)}
+  .criterios li:last-child{border-bottom:0}
+  .criterios b{display:block}
+  .criterios span{color:var(--tiza-2); font-size:.9rem}
+  .criterios .pts{font-family:var(--fd); color:var(--azafran); align-self:center; white-space:nowrap}
+  .datos{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  @media (max-width:420px){.datos{grid-template-columns:1fr}}
+  .dato .label{margin-bottom:4px}
+  .dato .v{font-size:1.15rem; font-weight:800; line-height:1.25}
+
+  /* Formularios */
+  form{display:grid; gap:14px}
+  .campo{display:grid; gap:6px}
+  .campo label{font-weight:800; font-size:.92rem}
+  .campo .ayuda{color:var(--tiza-3); font-size:.82rem}
+  input[type=text],input[type=password],input[type=tel],textarea,select{
+    width:100%; font:inherit; color:var(--tiza); background:var(--pizarra); border:1px solid var(--linea); border-radius:8px; padding:11px 12px;
+  }
+  textarea{min-height:88px; resize:vertical}
+  input:focus,textarea:focus,select:focus,button:focus-visible,.tab:focus-visible{outline:2px solid var(--azafran); outline-offset:2px}
+  .foto-zona{display:grid; grid-template-columns:110px 1fr; gap:12px; align-items:center}
+  .foto-prev{width:110px; aspect-ratio:1; border-radius:8px; background:var(--pizarra); border:1px dashed var(--linea); display:grid; place-items:center; color:var(--tiza-3); font-size:.8rem; text-align:center; padding:6px; overflow:hidden}
+  .foto-prev img{width:100%; height:100%; object-fit:cover; display:block}
+  input[type=file]{color:var(--tiza-2); font-size:.85rem; max-width:100%}
+
+  button,.btn{font:inherit; font-weight:800; border:0; border-radius:8px; padding:12px 16px; cursor:pointer; background:var(--pimenton); color:#fff; transition:transform .08s, background .15s; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:8px}
+  button:hover,.btn:hover{background:var(--pimenton-2)}
+  button:active{transform:translateY(1px)}
+  button:disabled{opacity:.45; cursor:not-allowed}
+  .btn-sec{background:var(--pizarra-3); color:var(--tiza)}
+  .btn-sec:hover{background:var(--linea)}
+  .btn-peq{padding:8px 12px; font-size:.86rem}
+  .btn-lin{background:transparent; color:var(--azafran); padding:6px 4px}
+  .btn-lin:hover{background:transparent; text-decoration:underline}
+  .fila{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+  .fila.der{justify-content:flex-end}
+
+  /* Chips y progreso */
+  .chip{display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:999px; font-size:.78rem; font-weight:800; letter-spacing:.03em}
+  .chip.ok{background:rgba(143,174,102,.18); color:var(--aceituna)}
+  .chip.pend{background:rgba(239,182,59,.16); color:var(--azafran)}
+  .chip.tuyo{background:rgba(226,85,47,.18); color:var(--pimenton-2)}
+  .progreso{height:8px; background:var(--pizarra); border-radius:999px; overflow:hidden; border:1px solid var(--linea)}
+  .progreso i{display:block; height:100%; background:var(--aceituna); width:0; transition:width .3s}
+
+  /* Platos */
+  .platos{display:grid; gap:12px}
+  .plato{display:grid; grid-template-columns:96px 1fr; gap:14px; background:var(--pizarra-2); border:1px solid var(--linea); border-radius:var(--radius); padding:12px; align-items:center; text-align:left; color:inherit; width:100%; font-weight:400}
+  .plato.clic{cursor:pointer}
+  .plato.clic:hover{border-color:var(--tiza-3); background:var(--pizarra-2)}
+  .plato img,.plato .sinfoto{width:96px; height:96px; border-radius:8px; object-fit:cover; background:var(--pizarra); display:grid; place-items:center; color:var(--tiza-3); font-size:.75rem}
+  .plato .t{font-family:var(--fd); font-weight:400; font-size:1.1rem; line-height:1.15; margin:0 0 4px}
+  .plato .d{color:var(--tiza-2); font-size:.9rem; margin:0; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden}
+  .plato .estado{margin-top:6px}
+
+  /* Ficha de puntuación */
+  .ficha-cab{display:grid; grid-template-columns:1fr; gap:10px; margin-bottom:14px}
+  .ficha-cab img{width:100%; max-height:260px; object-fit:cover; border-radius:8px; border:1px solid var(--linea)}
+  .criterio{display:grid; gap:6px; padding:12px 0; border-bottom:1px dashed var(--linea)}
+  .criterio:last-of-type{border-bottom:0}
+  .criterio .cab{display:flex; justify-content:space-between; align-items:baseline; gap:10px}
+  .criterio .nota{font-family:var(--fd); font-size:1.7rem; color:var(--azafran); line-height:1; min-width:2ch; text-align:right; font-variant-numeric:tabular-nums}
+  .criterio .desc{color:var(--tiza-3); font-size:.82rem}
+  input[type=range]{width:100%; accent-color:var(--pimenton); height:32px}
+  .escala{display:flex; justify-content:space-between; font-size:.72rem; color:var(--tiza-3)}
+  .total{display:flex; justify-content:space-between; align-items:baseline; padding:14px 0 4px; border-top:2px solid var(--linea); margin-top:6px}
+  .total .num{font-family:var(--fd); font-size:2.2rem; color:var(--tiza); font-variant-numeric:tabular-nums}
+  .total .num small{font-size:1rem; color:var(--tiza-3)}
+
+  /* Resultados */
+  .ganador{position:relative; text-align:center; padding:26px 18px 22px; border:2px solid var(--azafran); border-radius:var(--radius); background:linear-gradient(180deg, rgba(239,182,59,.12), rgba(239,182,59,.02)); margin-bottom:18px; overflow:hidden}
+  .ganador .sello{font-family:var(--fh); font-size:1.7rem; color:var(--azafran); transform:rotate(-3deg); display:inline-block; line-height:1}
+  .ganador img{width:min(100%,320px); aspect-ratio:4/3; object-fit:cover; border-radius:8px; margin:12px auto; display:block; border:1px solid var(--linea)}
+  .ganador .nombre{font-family:var(--fd); font-size:2rem; line-height:1.05; margin:.1em 0}
+  .ganador .plato-n{font-size:1.05rem; color:var(--tiza-2)}
+  .ganador .media{font-family:var(--fd); font-size:2.6rem; color:var(--azafran); margin-top:8px; line-height:1; font-variant-numeric:tabular-nums}
+  .ganador .media small{font-size:1rem; color:var(--tiza-3); font-family:var(--fb)}
+  .ranking{display:grid; gap:10px}
+  .rk{display:grid; grid-template-columns:36px 64px 1fr auto; gap:12px; align-items:center; background:var(--pizarra-2); border:1px solid var(--linea); border-radius:var(--radius); padding:10px 12px}
+  .rk .pos{font-family:var(--fd); font-size:1.5rem; color:var(--tiza-3); text-align:center}
+  .rk:nth-child(1) .pos{color:var(--azafran)} .rk:nth-child(2) .pos{color:var(--tiza-2)} .rk:nth-child(3) .pos{color:var(--pimenton-2)}
+  .rk img,.rk .sinfoto{width:64px; height:64px; border-radius:6px; object-fit:cover; background:var(--pizarra); display:grid; place-items:center; color:var(--tiza-3); font-size:.7rem}
+  .rk .n{font-weight:800; line-height:1.2} .rk .p{color:var(--tiza-2); font-size:.88rem}
+  .rk .m{font-family:var(--fd); font-size:1.5rem; color:var(--tiza); font-variant-numeric:tabular-nums; text-align:right}
+  .rk .m small{font-size:.8rem; color:var(--tiza-3); font-family:var(--fb); display:block; line-height:1}
+  .detalle{grid-column:1/-1; display:grid; gap:6px; padding-top:8px; border-top:1px dashed var(--linea)}
+  .barra{display:grid; grid-template-columns:110px 1fr 34px; gap:10px; align-items:center; font-size:.85rem}
+  .barra i{display:block; height:8px; border-radius:999px; background:var(--pizarra); border:1px solid var(--linea); overflow:hidden}
+  .barra i b{display:block; height:100%; background:var(--azafran)}
+  .barra .v{text-align:right; font-variant-numeric:tabular-nums; color:var(--tiza-2)}
+  .categorias{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-top:16px}
+  .cat{background:var(--pizarra-2); border:1px solid var(--linea); border-radius:8px; padding:12px}
+  .cat .label{margin-bottom:4px}
+  .cat .q{font-weight:800} .cat .w{color:var(--tiza-2); font-size:.86rem}
+
+  /* Pestañas */
+  .tabs{position:fixed; left:0; right:0; bottom:0; background:var(--pizarra-2); border-top:1px solid var(--linea); display:flex; justify-content:center; padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px)); z-index:5}
+  .tabs .in{display:grid; grid-template-columns:repeat(4,1fr); gap:4px; width:100%; max-width:640px}
+  .tab{background:transparent; color:var(--tiza-2); border-radius:8px; padding:9px 4px; font-size:.78rem; font-weight:800; display:grid; gap:2px; justify-items:center; letter-spacing:.02em}
+  .tab svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
+  .tab.activa{color:var(--azafran); background:rgba(239,182,59,.10)}
+  .tab:hover{background:var(--pizarra-3)}
+  .tab .punto{position:relative; display:inline-block; line-height:0}
+  .tab .punto::after{content:""; position:absolute; top:-2px; right:-6px; width:8px; height:8px; border-radius:50%; background:var(--pimenton); display:var(--dot,none)}
+
+  .vista{display:none} .vista.activa{display:block}
+  .toast{position:fixed; left:50%; bottom:calc(92px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%); background:var(--tiza); color:var(--pizarra); padding:10px 16px; border-radius:999px; font-weight:800; font-size:.9rem; box-shadow:0 8px 24px rgba(0,0,0,.35); opacity:0; pointer-events:none; transition:opacity .2s; z-index:9; max-width:calc(100% - 32px); text-align:center}
+  .toast.on{opacity:1}
+  .yo{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:14px; font-size:.9rem; color:var(--tiza-2); flex-wrap:wrap}
+  .yo b{color:var(--tiza)}
+  .modo{font-size:.78rem; color:var(--tiza-3)}
+  .modo i{display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px; background:var(--azafran)}
+  .modo.nube i{background:var(--aceituna)}
+  details summary{cursor:pointer; font-weight:800; color:var(--tiza-2)}
+  .lista-personas{display:grid; gap:8px}
+  .persona{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:8px 10px; background:var(--pizarra); border:1px solid var(--linea); border-radius:8px; flex-wrap:wrap}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="cabecera">
+    <span class="eyebrow" id="cab-fecha">Sábado 26 de septiembre</span>
+    <h1>Concurso de <em>tapas</em> en Vinateros</h1>
+    <p class="sub">Calle Vinateros, 2 · Arganda del Rey <strong id="cab-hora"></strong></p>
+  </header>
+
+  <div class="yo" id="yo-barra">
+    <span id="yo-texto">Todavía no te has inscrito.</span>
+    <span class="modo" id="modo"><i></i>Modo local</span>
+  </div>
+  <p class="aviso rojo small" id="aviso-local" hidden>Esta copia está en modo local: lo que se inscriba aquí solo se guarda en este navegador. Para que cada amigo use su móvil hay que pegar la configuración de Firebase en el archivo (ver LEEME.md).</p>
+
+  <!-- NORMAS -->
+  <section class="vista activa" id="v-normas">
+    <div class="bloque">
+      <h2>Las normas</h2>
+      <ol class="normas">
+        <li><span class="n">1</span><div><b>Trae tu tapa hecha de casa.</b> Solo puede faltarle calentarla. Aquí hay horno y microondas, no cocina para empezar de cero.</div></li>
+        <li><span class="n">2</span><div><b>Inscribe tu plato aquí antes del día 26</b> con tu nombre, cómo lo presentas y una foto. Las tapas quedan en secreto: nadie las ve hasta que el anfitrión dé comienzo al concurso.</div></li>
+        <li><span class="n">3</span><div><b>La votación es anónima.</b> Cuando empiece la cata, cada persona puntúa todos los platos menos el suyo. Nadie ve qué nota ha puesto cada cual ni de quién es cada tapa.</div></li>
+        <li><span class="n">4</span><div><b>Cuando todo el mundo haya votado,</b> el anfitrión publica los resultados: nombres, medias y la tapa ganadora.</div></li>
+      </ol>
+    </div>
+
+    <div class="bloque">
+      <h2>Qué se puntúa</h2>
+      <p class="muted small">Cada criterio de 1 a 10. La tapa con mejor media total gana.</p>
+      <ul class="criterios">
+        <li><div><b>Presentación</b><span>Cómo entra por los ojos: emplatado, color, cuidado.</span></div><span class="pts">1–10</span></li>
+        <li><div><b>Sabor</b><span>Lo que importa de verdad. Punto de sal, textura, temperatura.</span></div><span class="pts">1–10</span></li>
+        <li><div><b>Creatividad</b><span>Idea original, giro a un clásico o algo que no habías probado.</span></div><span class="pts">1–10</span></li>
+        <li><div><b>Ingredientes</b><span>Se premia tanto la sencillez bien resuelta con pocos ingredientes como el atrevimiento con ingredientes raros o muchos.</span></div><span class="pts">1–10</span></li>
+        <li><div><b>Nota del conjunto</b><span>Tu impresión global de la tapa, más allá de la suma de lo anterior.</span></div><span class="pts">1–10</span></li>
+      </ul>
+    </div>
+
+    <div class="bloque plano">
+      <div class="datos">
+        <div class="dato"><div class="label">Cuándo</div><div class="v" id="dato-fecha"></div></div>
+        <div class="dato"><div class="label">Dónde</div><div class="v"><a href="https://maps.google.com/?q=Calle+Vinateros+2,+Arganda+del+Rey" target="_blank" rel="noopener">Calle Vinateros, 2<br>Arganda del Rey</a></div></div>
+      </div>
+      <div class="fila" style="margin-top:14px">
+        <button class="btn-sec btn-peq" id="btn-compartir" type="button">Copiar enlace para invitar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLATOS / INSCRIPCIÓN -->
+  <section class="vista" id="v-platos">
+    <div class="bloque" id="bloque-inscripcion">
+      <h2 id="insc-titulo">Inscribe tu tapa</h2>
+      <form id="form-insc" autocomplete="off">
+        <div class="campo">
+          <label for="f-nombre">Tu nombre</label>
+          <input type="text" id="f-nombre" required maxlength="40" placeholder="Como quieres aparecer en los resultados">
+        </div>
+        <div class="campo">
+          <label for="f-plato">Nombre del plato</label>
+          <input type="text" id="f-plato" required maxlength="60" placeholder="Ej.: Croquetas de rabo de toro">
+        </div>
+        <div class="campo">
+          <label for="f-desc">Presentación</label>
+          <textarea id="f-desc" maxlength="400" placeholder="Cuenta de qué va, qué lleva, por qué la has elegido..."></textarea>
+          <span class="ayuda">Esto es lo que verán los demás antes de votar. No pongas tu nombre aquí si quieres mantener el misterio.</span>
+        </div>
+        <div class="campo">
+          <label for="f-foto">Foto del plato</label>
+          <div class="foto-zona">
+            <div class="foto-prev" id="foto-prev">Sin foto todavía</div>
+            <input type="file" id="f-foto" accept="image/*">
+          </div>
+        </div>
+        <div class="campo">
+          <label for="f-pin">PIN de 4 cifras</label>
+          <input type="tel" id="f-pin" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required placeholder="1234">
+          <span class="ayuda">Sirve para recuperar tu inscripción desde otro móvil o si borras el navegador.</span>
+        </div>
+        <div class="fila der">
+          <button type="button" class="btn-sec" id="btn-cancelar-edicion" hidden>Cancelar</button>
+          <button type="submit" id="btn-inscribir">Inscribir mi tapa</button>
+        </div>
+      </form>
+      <details style="margin-top:14px" id="det-recuperar">
+        <summary>¿Ya te habías inscrito? Recupera tu inscripción</summary>
+        <div class="lista-personas" id="lista-recuperar" style="margin-top:10px"></div>
+      </details>
+    </div>
+
+    <div class="bloque" id="bloque-mi-plato" hidden>
+      <div class="fila" style="justify-content:space-between">
+        <h2 style="margin:0">Tu tapa</h2>
+        <span class="chip tuyo">Inscrita</span>
+      </div>
+      <div id="mi-plato" style="margin-top:12px"></div>
+      <div class="fila" style="margin-top:12px">
+        <button class="btn-sec btn-peq" type="button" id="btn-editar">Editar</button>
+        <button class="btn-lin btn-peq" type="button" id="btn-salir">Cambiar de persona</button>
+      </div>
+    </div>
+
+    <h2 id="platos-titulo">Tapas inscritas</h2>
+    <p class="muted small" id="platos-vacio">Todavía no hay ninguna tapa. Sé la primera persona en inscribirte.</p>
+    <div class="platos" id="lista-platos"></div>
+  </section>
+
+  <!-- VOTAR -->
+  <section class="vista" id="v-votar">
+    <div id="votar-lista">
+      <div class="bloque">
+        <h2>Tu ficha de cata</h2>
+        <p class="muted small" id="votar-intro">Toca un plato para puntuarlo. Puedes cambiar tus notas hasta que se publiquen los resultados.</p>
+        <div class="progreso" aria-hidden="true"><i id="prog-barra"></i></div>
+        <p class="small" style="margin-top:8px" id="prog-texto"></p>
+      </div>
+      <div class="platos" id="lista-votar"></div>
+    </div>
+
+    <div id="votar-ficha" hidden>
+      <button class="btn-lin" type="button" id="btn-volver">← Volver a la lista</button>
+      <div class="bloque" style="margin-top:8px">
+        <div class="ficha-cab" id="ficha-cab"></div>
+        <form id="form-voto">
+          <div id="ficha-criterios"></div>
+          <div class="total"><span class="label">Total</span><span class="num"><span id="ficha-total">25</span><small> / 50</small></span></div>
+          <div class="fila der"><button type="submit">Guardar mi puntuación</button></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTADOS -->
+  <section class="vista" id="v-resultados">
+    <div id="res-bloqueado">
+      <div class="bloque">
+        <h2 id="res-titulo">Aún no hay resultados</h2>
+        <p class="muted" id="res-motivo"></p>
+        <div class="progreso" aria-hidden="true"><i id="res-prog"></i></div>
+        <div class="lista-personas" id="res-quien" style="margin-top:12px"></div>
+      </div>
+    </div>
+    <div id="res-abierto" hidden>
+      <div class="ganador" id="ganador"></div>
+      <h2>Clasificación</h2>
+      <div class="ranking" id="ranking"></div>
+      <h2 style="margin-top:20px">Por categorías</h2>
+      <div class="categorias" id="categorias"></div>
+    </div>
+
+    <div class="bloque plano" style="margin-top:22px">
+      <details id="det-anfitrion">
+        <summary>Panel del anfitrión</summary>
+        <div id="anf-bloqueado" style="margin-top:10px">
+          <div class="campo">
+            <label for="anf-codigo">Código de anfitrión</label>
+            <div class="fila"><input type="password" id="anf-codigo" style="max-width:200px"><button class="btn-sec btn-peq" type="button" id="anf-entrar">Entrar</button></div>
+          </div>
+        </div>
+        <div id="anf-panel" hidden style="margin-top:10px; display:grid; gap:10px">
+          <p class="small" id="anf-fase"></p>
+          <div class="fila">
+            <button class="btn-peq" type="button" id="anf-empezar">Empezar el concurso</button>
+            <button class="btn-peq" type="button" id="anf-publicar">Publicar resultados</button>
+          </div>
+          <div class="fila">
+            <button class="btn-sec btn-peq" type="button" id="anf-atras">Volver a la fase anterior</button>
+          </div>
+          <div>
+            <div class="label" style="margin-bottom:6px">Eliminar una inscripción</div>
+            <div class="lista-personas" id="anf-lista"></div>
+          </div>
+          <div class="fila">
+            <button class="btn-sec btn-peq" type="button" id="anf-reiniciar">Reiniciar el concurso (borra todo)</button>
+          </div>
+        </div>
+      </details>
+    </div>
+  </section>
+</div>
+
+<nav class="tabs" aria-label="Secciones">
+  <div class="in">
+    <button class="tab activa" data-vista="normas" type="button"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>Normas</button>
+    <button class="tab" data-vista="platos" type="button"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/></svg>Tapas</button>
+    <button class="tab" data-vista="votar" type="button"><span class="punto" id="dot-votar"><svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg></span>Votar</button>
+    <button class="tab" data-vista="resultados" type="button"><svg viewBox="0 0 24 24"><path d="M7 4h10v3a5 5 0 0 1-10 0z"/><path d="M7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 12v4M9 20h6M12 16l-2 4M12 16l2 4"/></svg>Resultados</button>
+  </div>
+</nav>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ==========================================================
+   CONFIGURACIÓN DEL CONCURSO (edita aquí lo que quieras)
+   ========================================================== */
+const EVENTO = {
+  fecha: "Sábado 26 de septiembre de 2026",
+  fechaCorta: "Sábado 26 de septiembre",
+  hora: "",                        // Ej.: "a partir de las 14:00". Déjalo vacío si no quieres mostrarlo.
+  codigoAnfitrion: "VINATEROS",    // Código para el panel del anfitrión. Cámbialo.
+};
+
+/* Pega aquí la configuración de tu proyecto de Firebase (ver LEEME.md).
+   Mientras esté en null, la app funciona en "modo local": los datos se guardan
+   solo en este navegador. Sirve para probar o para hacer el concurso en un
+   único móvil que se va pasando. */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCfzJphdeAykva40757tqubI5W4INovWSo",
+  authDomain: "concurso-de-tapas-9b176.firebaseapp.com",
+  projectId: "concurso-de-tapas-9b176",
+  storageBucket: "concurso-de-tapas-9b176.firebasestorage.app",
+  messagingSenderId: "406362636674",
+  appId: "1:406362636674:web:c67837f2d16b71244e8f9b"
+};
+
+const CRITERIOS = [
+  {k:"pre", n:"Presentación", d:"Emplatado, color, cuidado."},
+  {k:"sab", n:"Sabor", d:"Punto de sal, textura, temperatura."},
+  {k:"cre", n:"Creatividad", d:"Idea original o giro a un clásico."},
+  {k:"ing", n:"Ingredientes", d:"Sencillez bien resuelta o atrevimiento con ingredientes raros o muchos."},
+  {k:"con", n:"Nota del conjunto", d:"Tu impresión global de la tapa."},
+];
+
+/* ==========================================================
+   ALMACÉN: local (localStorage) o nube (Firebase Firestore)
+   ========================================================== */
+const uid = () => Math.random().toString(36).slice(2,10) + Date.now().toString(36);
+
+function crearAlmacenLocal(){
+  const K = "tapas.vinateros.datos";
+  const vacio = () => ({participantes:{}, votos:{}, estado:{}});
+  const leer = () => { try { return JSON.parse(localStorage.getItem(K)) || vacio(); } catch(e){ return vacio(); } };
+  const oyentes = new Set();
+  const avisar = () => { const d = leer(); oyentes.forEach(f => f(d)); };
+  const escribir = d => { localStorage.setItem(K, JSON.stringify(d)); avisar(); };
+  window.addEventListener("storage", e => { if (e.key === K) avisar(); });
+  return {
+    modo: "local",
+    suscribir(f){ oyentes.add(f); f(leer()); return () => oyentes.delete(f); },
+    async guardarParticipante(id, p){ const d = leer(); d.participantes[id] = p; escribir(d); },
+    async borrarParticipante(id){ const d = leer(); delete d.participantes[id]; delete d.votos[id]; escribir(d); },
+    async guardarVoto(id, v){ const d = leer(); d.votos[id] = v; escribir(d); },
+    async guardarEstado(e){ const d = leer(); d.estado = {...d.estado, ...e}; escribir(d); },
+    async reiniciar(){ escribir(vacio()); },
+  };
+}
+
+function cargarScript(src){ return new Promise((ok, ko) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = ko; document.head.appendChild(s); }); }
+
+async function crearAlmacenNube(cfg){
+  const V = "10.14.1";
+  await cargarScript(`https://www.gstatic.com/firebasejs/${V}/firebase-app-compat.js`);
+  await cargarScript(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore-compat.js`);
+  firebase.initializeApp(cfg);
+  const fs = firebase.firestore();
+  const datos = {participantes:{}, votos:{}, estado:{}};
+  const oyentes = new Set();
+  const avisar = () => oyentes.forEach(f => f(datos));
+  fs.collection("participantes").onSnapshot(s => { datos.participantes = {}; s.forEach(d => datos.participantes[d.id] = d.data()); avisar(); }, e => toast("Error leyendo participantes: " + e.message));
+  fs.collection("votos").onSnapshot(s => { datos.votos = {}; s.forEach(d => datos.votos[d.id] = d.data()); avisar(); }, e => toast("Error leyendo votos: " + e.message));
+  fs.doc("config/estado").onSnapshot(d => { datos.estado = d.exists ? d.data() : {}; avisar(); });
+  return {
+    modo: "nube",
+    suscribir(f){ oyentes.add(f); f(datos); return () => oyentes.delete(f); },
+    async guardarParticipante(id, p){ await fs.collection("participantes").doc(id).set(p); },
+    async borrarParticipante(id){ await fs.collection("participantes").doc(id).delete(); await fs.collection("votos").doc(id).delete(); },
+    async guardarVoto(id, v){ await fs.collection("votos").doc(id).set(v); },
+    async guardarEstado(e){ await fs.doc("config/estado").set(e, {merge:true}); },
+    async reiniciar(){
+      const b = fs.batch();
+      (await fs.collection("participantes").get()).forEach(d => b.delete(d.ref));
+      (await fs.collection("votos").get()).forEach(d => b.delete(d.ref));
+      b.delete(fs.doc("config/estado"));
+      await b.commit();
+    },
+  };
+}
+
+/* ==========================================================
+   ESTADO DE LA APP
+   ========================================================== */
+const $ = s => document.querySelector(s);
+let almacen = null;
+let D = {participantes:{}, votos:{}, estado:{}};
+let yo = localStorage.getItem("tapas.vinateros.yo") || null;
+let fotoActual = null;          // dataURL de la foto en el formulario
+let editando = false;
+let platoEnFicha = null;
+let anfitrion = sessionStorage.getItem("tapas.anfitrion") === "1";
+let confirmarPendiente = null;
+
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const lista = () => Object.entries(D.participantes).map(([id,p]) => ({id, ...p})).sort((a,b) => (a.creado||0) - (b.creado||0));
+const miVoto = () => (yo && D.votos[yo] && D.votos[yo].puntos) || {};
+const votoCompleto = (idVotante) => {
+  const ps = lista().filter(p => p.id !== idVotante);
+  const v = (D.votos[idVotante] && D.votos[idVotante].puntos) || {};
+  return ps.length > 0 && ps.every(p => v[p.id]);
+};
+const todosHanVotado = () => { const l = lista(); return l.length >= 2 && l.every(p => votoCompleto(p.id)); };
+/* Fases del concurso, que solo cambia el anfitrión:
+   "inscripcion" (tapas ocultas, se puede inscribir) → "cata" (tapas visibles, votación abierta) → "resultados" */
+const fase = () => D.estado.fase || "inscripcion";
+const cataAbierta = () => fase() === "cata";
+const resultadosAbiertos = () => fase() === "resultados";
+const inscripcionCerrada = () => fase() !== "inscripcion";
+
+function toast(msg){ const t = $("#toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("on"), 2600); }
+
+/* Pestañas */
+function irA(v){
+  document.querySelectorAll(".vista").forEach(s => s.classList.toggle("activa", s.id === "v-" + v));
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("activa", t.dataset.vista === v));
+  window.scrollTo({top:0});
+  if (v !== "votar") { $("#votar-ficha").hidden = true; $("#votar-lista").hidden = false; platoEnFicha = null; }
+}
+document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => irA(t.dataset.vista)));
+
+/* ==========================================================
+   FOTO: reducir a 900px y JPEG para que quepa en la base de datos
+   ========================================================== */
+function reducirFoto(file){
+  return new Promise((ok, ko) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const MAX = 900; let w = img.width, h = img.height;
+      const r = Math.min(1, MAX / Math.max(w, h)); w = Math.round(w*r); h = Math.round(h*r);
+      const c = document.createElement("canvas"); c.width = w; c.height = h;
+      c.getContext("2d").drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      let q = 0.8, out = c.toDataURL("image/jpeg", q);
+      while (out.length > 380000 && q > 0.4) { q -= 0.1; out = c.toDataURL("image/jpeg", q); }
+      ok(out);
+    };
+    img.onerror = () => ko(new Error("No se pudo leer la imagen"));
+    img.src = url;
+  });
+}
+$("#f-foto").addEventListener("change", async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try { fotoActual = await reducirFoto(f); $("#foto-prev").innerHTML = `<img src="${fotoActual}" alt="Tu plato">`; }
+  catch(err){ toast("No se pudo cargar la foto. Prueba con otra."); }
+});
+
+/* ==========================================================
+   INSCRIPCIÓN
+   ========================================================== */
+$("#form-insc").addEventListener("submit", async e => {
+  e.preventDefault();
+  const nombre = $("#f-nombre").value.trim(), plato = $("#f-plato").value.trim(), desc = $("#f-desc").value.trim(), pin = $("#f-pin").value.trim();
+  if (!/^\d{4}$/.test(pin)) return toast("El PIN son 4 cifras.");
+  if (!editando && inscripcionCerrada()) return toast("Las inscripciones están cerradas.");
+  const id = editando ? yo : uid();
+  const previo = editando ? D.participantes[yo] : null;
+  const p = { nombre, plato, desc, pin, foto: fotoActual || (previo && previo.foto) || "", creado: previo ? previo.creado : Date.now() };
+  const btn = $("#btn-inscribir"); btn.disabled = true;
+  try {
+    await almacen.guardarParticipante(id, p);
+    yo = id; localStorage.setItem("tapas.vinateros.yo", id);
+    editando = false; fotoActual = null;
+    toast(previo ? "Cambios guardados" : "¡Tapa inscrita! Ya puedes votar cuando empiece la cata.");
+    render();
+  } catch(err){ toast("No se pudo guardar: " + err.message); }
+  btn.disabled = false;
+});
+
+function rellenarFormulario(p){
+  $("#f-nombre").value = p ? p.nombre : ""; $("#f-plato").value = p ? p.plato : ""; $("#f-desc").value = p ? p.desc : ""; $("#f-pin").value = p ? p.pin : "";
+  $("#f-foto").value = ""; fotoActual = null;
+  $("#foto-prev").innerHTML = p && p.foto ? `<img src="${p.foto}" alt="">` : "Sin foto todavía";
+}
+$("#btn-editar").addEventListener("click", () => { editando = true; rellenarFormulario(D.participantes[yo]); render(); $("#f-nombre").focus(); });
+$("#btn-cancelar-edicion").addEventListener("click", () => { editando = false; rellenarFormulario(null); render(); });
+$("#btn-salir").addEventListener("click", () => { yo = null; localStorage.removeItem("tapas.vinateros.yo"); editando = false; rellenarFormulario(null); render(); toast("Ahora puede inscribirse otra persona."); });
+
+function renderRecuperar(){
+  const cont = $("#lista-recuperar");
+  const ps = lista().filter(p => p.id !== yo);
+  if (!ps.length) { cont.innerHTML = `<p class="small muted">No hay inscripciones que recuperar.</p>`; return; }
+  cont.innerHTML = ps.map(p => `<div class="persona"><span><b>${esc(p.nombre)}</b>${fase() === "inscripcion" ? "" : ` <span class="muted small">· ${esc(p.plato)}</span>`}</span>
+    <span class="fila"><input type="tel" inputmode="numeric" maxlength="4" placeholder="PIN" style="width:74px;padding:6px 8px" id="rec-${p.id}" aria-label="PIN de ${esc(p.nombre)}"><button class="btn-sec btn-peq" type="button" data-rec="${p.id}">Soy yo</button></span></div>`).join("");
+  cont.querySelectorAll("[data-rec]").forEach(b => b.addEventListener("click", () => {
+    const id = b.dataset.rec, pin = $("#rec-" + id).value.trim();
+    if (pin !== D.participantes[id].pin) return toast("Ese PIN no coincide.");
+    yo = id; localStorage.setItem("tapas.vinateros.yo", id); editando = false; rellenarFormulario(null); render(); toast("Hola de nuevo, " + D.participantes[id].nombre);
+  }));
+}
+
+/* ==========================================================
+   RENDER GENERAL
+   ========================================================== */
+function tarjetaPlato(p, extra = "", clic = false){
+  const foto = p.foto ? `<img src="${p.foto}" alt="${esc(p.plato)}">` : `<div class="sinfoto">Sin foto</div>`;
+  const tag = clic ? "button" : "div";
+  return `<${tag} class="plato${clic ? " clic" : ""}" ${clic ? `type="button" data-plato="${p.id}"` : ""}>${foto}<div><p class="t">${esc(p.plato)}</p><p class="d">${esc(p.desc) || "<i>Sin presentación</i>"}</p>${extra}</div></${tag}>`;
+}
+
+function render(){
+  const mio = yo && D.participantes[yo];
+  if (!mio && yo) { yo = null; localStorage.removeItem("tapas.vinateros.yo"); }
+
+  // Barra "yo"
+  $("#yo-texto").innerHTML = mio ? `Eres <b>${esc(mio.nombre)}</b>` : "Todavía no te has inscrito.";
+  const nube = almacen && almacen.modo === "nube";
+  const m = $("#modo"); m.className = "modo " + (nube ? "nube" : "");
+  m.innerHTML = `<i></i>${nube ? "Conectado" : "Modo local (solo este móvil)"}`;
+  $("#aviso-local").hidden = !!nube;
+
+  // Inscripción
+  const mostrarForm = !mio || editando;
+  $("#bloque-inscripcion").hidden = !mostrarForm;
+  $("#bloque-mi-plato").hidden = mostrarForm;
+  $("#insc-titulo").textContent = editando ? "Edita tu tapa" : "Inscribe tu tapa";
+  $("#btn-inscribir").textContent = editando ? "Guardar cambios" : "Inscribir mi tapa";
+  $("#btn-cancelar-edicion").hidden = !editando;
+  $("#det-recuperar").hidden = editando;
+  if (!mio && !editando && inscripcionCerrada()) {
+    $("#form-insc").hidden = true;
+    if (!$("#insc-cerrada")) $("#insc-titulo").insertAdjacentHTML("afterend", `<p class="aviso rojo" id="insc-cerrada">El concurso ya ha empezado y las inscripciones están cerradas. Si ya te habías inscrito, recupera tu inscripción más abajo.</p>`);
+  } else { $("#form-insc").hidden = false; const a = $("#insc-cerrada"); if (a) a.remove(); }
+  if (mio && !editando) $("#mi-plato").innerHTML = tarjetaPlato({...mio});
+  renderRecuperar();
+
+  // Lista de platos: oculta hasta que el anfitrión empieza el concurso; anónima hasta los resultados
+  const ps = lista();
+  const abiertos = resultadosAbiertos();
+  const enInscripcion = fase() === "inscripcion";
+  $("#platos-titulo").textContent = `Tapas inscritas (${ps.length})`;
+  $("#platos-vacio").hidden = false;
+  $("#platos-vacio").textContent = enInscripcion
+    ? (ps.length ? `Ya hay ${ps.length} ${ps.length === 1 ? "tapa inscrita" : "tapas inscritas"}. Se revelarán cuando el anfitrión dé comienzo al concurso el día del evento.` : "Todavía no hay ninguna tapa. Sé la primera persona en inscribirte.")
+    : (ps.length ? "" : "No hay tapas inscritas.");
+  $("#platos-vacio").hidden = !$("#platos-vacio").textContent;
+  $("#lista-platos").innerHTML = enInscripcion ? "" : ps.map(p => tarjetaPlato(p, p.id === yo ? `<div class="estado"><span class="chip tuyo">La tuya</span></div>` : (abiertos ? `<div class="estado small muted">de ${esc(p.nombre)}</div>` : ""))).join("");
+
+  // Votar: solo durante la cata
+  const v = miVoto();
+  const otros = ps.filter(p => p.id !== yo);
+  const hechos = otros.filter(p => v[p.id]).length;
+  const puedeVotar = mio && cataAbierta();
+  $("#prog-barra").style.width = otros.length && !enInscripcion ? (100*hechos/otros.length) + "%" : "0%";
+  $("#prog-texto").textContent = !mio ? "Inscríbete en la pestaña Tapas para poder votar."
+    : enInscripcion ? "La ficha se abrirá cuando el anfitrión dé comienzo al concurso."
+    : otros.length ? `${hechos} de ${otros.length} platos puntuados${hechos === otros.length ? ". ¡Ficha completa!" : ""}` : "No hay otras tapas que puntuar.";
+  $("#lista-votar").innerHTML = enInscripcion || !mio ? "" : otros.map(p => tarjetaPlato(p, `<div class="estado">${v[p.id] ? `<span class="chip ok">Puntuado · ${sumaVoto(v[p.id])}/50</span>` : `<span class="chip pend">Pendiente</span>`}</div>`, puedeVotar)).join("");
+  $("#lista-votar").querySelectorAll("[data-plato]").forEach(b => b.addEventListener("click", () => abrirFicha(b.dataset.plato)));
+  $("#votar-intro").textContent = abiertos ? "Los resultados ya están publicados: la votación está cerrada."
+    : enInscripcion ? "Aquí puntuarás cada tapa el día del concurso. Hasta entonces las tapas permanecen en secreto."
+    : "Toca un plato para puntuarlo. Puedes cambiar tus notas hasta que el anfitrión publique los resultados.";
+  $("#dot-votar").style.setProperty("--dot", puedeVotar && hechos < otros.length ? "block" : "none");
+
+  renderResultados();
+  renderAnfitrion();
+}
+
+/* ==========================================================
+   FICHA DE PUNTUACIÓN
+   ========================================================== */
+const sumaVoto = s => CRITERIOS.reduce((t,c) => t + (Number(s[c.k]) || 0), 0);
+
+function abrirFicha(id){
+  const p = D.participantes[id]; if (!p) return;
+  platoEnFicha = id;
+  const prev = miVoto()[id] || {};
+  $("#ficha-cab").innerHTML = `${p.foto ? `<img src="${p.foto}" alt="${esc(p.plato)}">` : ""}<div><h2 style="margin:0">${esc(p.plato)}</h2><p class="muted small" style="margin:4px 0 0">${esc(p.desc)}</p></div>`;
+  $("#ficha-criterios").innerHTML = CRITERIOS.map(c => `<div class="criterio">
+      <div class="cab"><div><b>${c.n}</b><div class="desc">${c.d}</div></div><span class="nota" id="n-${c.k}">${prev[c.k] || 5}</span></div>
+      <input type="range" min="1" max="10" step="1" value="${prev[c.k] || 5}" id="r-${c.k}" aria-label="${c.n}">
+      <div class="escala"><span>1 · flojo</span><span>5</span><span>10 · de matrícula</span></div>
+    </div>`).join("");
+  const actualizar = () => { let t = 0; CRITERIOS.forEach(c => { const val = Number($("#r-" + c.k).value); $("#n-" + c.k).textContent = val; t += val; }); $("#ficha-total").textContent = t; };
+  CRITERIOS.forEach(c => $("#r-" + c.k).addEventListener("input", actualizar)); actualizar();
+  $("#votar-lista").hidden = true; $("#votar-ficha").hidden = false; window.scrollTo({top:0});
+}
+$("#btn-volver").addEventListener("click", () => { $("#votar-ficha").hidden = true; $("#votar-lista").hidden = false; platoEnFicha = null; });
+$("#form-voto").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!yo || !platoEnFicha) return;
+  if (!cataAbierta()) return toast("La votación no está abierta.");
+  const s = {}; CRITERIOS.forEach(c => s[c.k] = Number($("#r-" + c.k).value));
+  const puntos = {...miVoto(), [platoEnFicha]: s};
+  try { await almacen.guardarVoto(yo, {puntos, actualizado: Date.now()}); toast("Puntuación guardada"); $("#btn-volver").click(); render(); }
+  catch(err){ toast("No se pudo guardar: " + err.message); }
+});
+
+/* ==========================================================
+   RESULTADOS
+   ========================================================== */
+function calcular(){
+  const ps = lista();
+  return ps.map(p => {
+    const acc = {}; CRITERIOS.forEach(c => acc[c.k] = []);
+    Object.entries(D.votos).forEach(([vid, v]) => { if (vid === p.id) return; const s = v.puntos && v.puntos[p.id]; if (!s) return; CRITERIOS.forEach(c => acc[c.k].push(Number(s[c.k]) || 0)); });
+    const n = acc.pre.length;
+    const medias = {}; CRITERIOS.forEach(c => medias[c.k] = n ? acc[c.k].reduce((a,b) => a+b, 0)/n : 0);
+    const total = CRITERIOS.reduce((t,c) => t + medias[c.k], 0);
+    return {...p, n, medias, total};
+  }).sort((a,b) => b.total - a.total || b.medias.sab - a.medias.sab || b.medias.con - a.medias.con);
+}
+const f1 = x => (Math.round(x*10)/10).toLocaleString("es-ES", {minimumFractionDigits:1, maximumFractionDigits:1});
+
+function renderResultados(){
+  const abiertos = resultadosAbiertos();
+  $("#res-bloqueado").hidden = abiertos; $("#res-abierto").hidden = !abiertos;
+  $("#res-titulo").textContent = cataAbierta() ? "Aún no hay resultados" : "Los resultados se publican el día 26";
+  const ps = lista();
+  if (!abiertos) {
+    const completos = ps.filter(p => votoCompleto(p.id)).length;
+    const enCata = cataAbierta();
+    $("#res-prog").style.width = ps.length && enCata ? (100*completos/ps.length) + "%" : "0%";
+    $("#res-motivo").textContent = !enCata ? "El anfitrión publicará los resultados el día del concurso, cuando todo el mundo haya votado."
+      : completos === ps.length ? "Todo el mundo ha votado. Falta que el anfitrión publique los resultados."
+      : `Los publicará el anfitrión cuando las ${ps.length} personas inscritas hayan puntuado todos los platos. Van ${completos} de ${ps.length}.`;
+    $("#res-quien").innerHTML = !enCata ? "" : ps.map(p => `<div class="persona"><span>${esc(p.nombre)}</span>${votoCompleto(p.id) ? `<span class="chip ok">Ha votado</span>` : `<span class="chip pend">Le falta</span>`}</div>`).join("");
+    return;
+  }
+  const r = calcular();
+  const g = r[0];
+  if (!g) { $("#ganador").innerHTML = "<p>No hay tapas.</p>"; $("#ranking").innerHTML = ""; $("#categorias").innerHTML = ""; return; }
+  const empate = r.length > 1 && Math.abs(r[1].total - g.total) < 0.001;
+  $("#ganador").innerHTML = `<span class="sello">${empate ? "Empate en cabeza" : "Tapa ganadora"}</span>
+    ${g.foto ? `<img src="${g.foto}" alt="${esc(g.plato)}">` : ""}
+    <div class="nombre">${esc(g.nombre)}</div>
+    <div class="plato-n">${esc(g.plato)}</div>
+    <div class="media">${f1(g.total)}<small> / 50 de media · ${g.n} ${g.n === 1 ? "voto" : "votos"}</small></div>`;
+  $("#ranking").innerHTML = r.map((p, i) => `<div class="rk">
+      <div class="pos">${i+1}</div>
+      ${p.foto ? `<img src="${p.foto}" alt="">` : `<div class="sinfoto">Sin foto</div>`}
+      <div><div class="n">${esc(p.nombre)}</div><div class="p">${esc(p.plato)}</div></div>
+      <div class="m">${f1(p.total)}<small>/ 50</small></div>
+      <div class="detalle">${CRITERIOS.map(c => `<div class="barra"><span>${c.n}</span><i><b style="width:${p.medias[c.k]*10}%"></b></i><span class="v">${f1(p.medias[c.k])}</span></div>`).join("")}</div>
+    </div>`).join("");
+  $("#categorias").innerHTML = CRITERIOS.map(c => {
+    const best = [...r].sort((a,b) => b.medias[c.k] - a.medias[c.k])[0];
+    return `<div class="cat"><div class="label">Mejor ${c.n.toLowerCase()}</div><div class="q">${esc(best.nombre)}</div><div class="w">${esc(best.plato)} · ${f1(best.medias[c.k])}</div></div>`;
+  }).join("");
+}
+
+/* ==========================================================
+   PANEL DEL ANFITRIÓN
+   ========================================================== */
+function renderAnfitrion(){
+  $("#anf-bloqueado").hidden = anfitrion; $("#anf-panel").hidden = !anfitrion;
+  if (!anfitrion) return;
+  const f = fase(), ps = lista(), completos = ps.filter(p => votoCompleto(p.id)).length;
+  $("#anf-fase").innerHTML = f === "inscripcion"
+    ? `Fase actual: <b>inscripción</b>. Hay ${ps.length} ${ps.length === 1 ? "tapa inscrita" : "tapas inscritas"}, ocultas para todos. Al empezar el concurso se cierran las inscripciones, se revelan las tapas y se abre la votación.`
+    : f === "cata"
+    ? `Fase actual: <b>cata</b>. Han completado su ficha ${completos} de ${ps.length}. Publica los resultados cuando hayan votado todos${completos < ps.length ? " (aún faltan)" : ""}.`
+    : `Fase actual: <b>resultados publicados</b>. Todo el mundo ve ya la clasificación.`;
+  $("#anf-empezar").hidden = f !== "inscripcion";
+  $("#anf-publicar").hidden = f !== "cata";
+  $("#anf-publicar").textContent = completos < ps.length ? `Publicar resultados (faltan ${ps.length - completos})` : "Publicar resultados";
+  $("#anf-atras").hidden = f === "inscripcion";
+  $("#anf-atras").textContent = f === "cata" ? "Volver a inscripción (oculta las tapas)" : "Volver a la cata (oculta los resultados)";
+  $("#anf-lista").innerHTML = lista().map(p => `<div class="persona"><span><b>${esc(p.nombre)}</b> <span class="muted small">· ${esc(p.plato)}</span></span><button class="btn-sec btn-peq" type="button" data-del="${p.id}">${confirmarPendiente === "del:" + p.id ? "¿Seguro? Toca otra vez" : "Eliminar"}</button></div>`).join("") || `<p class="small muted">Nadie inscrito.</p>`;
+  $("#anf-lista").querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", async () => {
+    const id = b.dataset.del;
+    if (confirmarPendiente !== "del:" + id) { confirmarPendiente = "del:" + id; renderAnfitrion(); setTimeout(() => { if (confirmarPendiente === "del:" + id) { confirmarPendiente = null; renderAnfitrion(); } }, 4000); return; }
+    confirmarPendiente = null; await almacen.borrarParticipante(id); toast("Inscripción eliminada");
+  }));
+  $("#anf-reiniciar").textContent = confirmarPendiente === "reset" ? "¿Seguro? Toca otra vez para borrar todo" : "Reiniciar el concurso (borra todo)";
+}
+$("#anf-entrar").addEventListener("click", () => {
+  if ($("#anf-codigo").value.trim().toUpperCase() !== EVENTO.codigoAnfitrion.toUpperCase()) return toast("Código incorrecto.");
+  anfitrion = true; sessionStorage.setItem("tapas.anfitrion", "1"); $("#anf-codigo").value = ""; renderAnfitrion();
+});
+$("#anf-codigo").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); $("#anf-entrar").click(); } });
+$("#anf-empezar").addEventListener("click", () => {
+  if (lista().length < 2) return toast("Hacen falta al menos dos tapas inscritas.");
+  almacen.guardarEstado({fase:"cata"}).then(() => toast("¡Empieza el concurso! Tapas reveladas y votación abierta."));
+});
+$("#anf-publicar").addEventListener("click", () => {
+  const ps = lista(), completos = ps.filter(p => votoCompleto(p.id)).length;
+  if (completos < ps.length && confirmarPendiente !== "pub") { confirmarPendiente = "pub"; toast(`Faltan ${ps.length - completos} por votar. Toca otra vez para publicar igualmente.`); setTimeout(() => { if (confirmarPendiente === "pub") confirmarPendiente = null; }, 4000); return; }
+  confirmarPendiente = null;
+  almacen.guardarEstado({fase:"resultados"}).then(() => toast("Resultados publicados"));
+});
+$("#anf-atras").addEventListener("click", () => almacen.guardarEstado({fase: fase() === "resultados" ? "cata" : "inscripcion"}).then(() => toast("Fase cambiada")));
+$("#anf-reiniciar").addEventListener("click", async () => {
+  if (confirmarPendiente !== "reset") { confirmarPendiente = "reset"; renderAnfitrion(); setTimeout(() => { if (confirmarPendiente === "reset") { confirmarPendiente = null; renderAnfitrion(); } }, 4000); return; }
+  confirmarPendiente = null; await almacen.reiniciar(); yo = null; localStorage.removeItem("tapas.vinateros.yo"); rellenarFormulario(null); toast("Concurso reiniciado"); render();
+});
+
+/* Compartir */
+$("#btn-compartir").addEventListener("click", async () => {
+  const url = location.href.split("#")[0];
+  const texto = `Concurso de tapas en Vinateros, ${EVENTO.fechaCorta}. Inscribe tu tapa y vota aquí: ${url}`;
+  if (navigator.share) { try { await navigator.share({title:"Concurso de tapas en Vinateros", text:texto, url}); return; } catch(e){} }
+  try { await navigator.clipboard.writeText(texto); toast("Enlace copiado. Pégalo en el grupo."); } catch(e){ toast(url); }
+});
+
+/* ==========================================================
+   ARRANQUE
+   ========================================================== */
+(async function(){
+  $("#cab-fecha").textContent = EVENTO.fechaCorta;
+  $("#cab-hora").textContent = EVENTO.hora ? "· " + EVENTO.hora : "";
+  $("#dato-fecha").innerHTML = esc(EVENTO.fecha) + (EVENTO.hora ? `<br><span class="muted" style="font-weight:400">${esc(EVENTO.hora)}</span>` : "");
+  try { almacen = FIREBASE_CONFIG ? await crearAlmacenNube(FIREBASE_CONFIG) : crearAlmacenLocal(); }
+  catch(e){ toast("No se pudo conectar con la nube. Usando modo local."); almacen = crearAlmacenLocal(); }
+  almacen.suscribir(d => { D = d; render(); });
+  const h = location.hash.replace("#",""); if (["normas","platos","votar","resultados"].includes(h)) irA(h);
+})();
+</script>
+</body>
+</html>
