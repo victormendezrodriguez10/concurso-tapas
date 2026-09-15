@@ -182,6 +182,18 @@
   .barra i{display:block; height:8px; border-radius:999px; background:var(--pizarra); border:1px solid var(--linea); overflow:hidden}
   .barra i b{display:block; height:100%; background:var(--azafran)}
   .barra .v{text-align:right; font-variant-numeric:tabular-nums; color:var(--tiza-2)}
+  .mano{font-family:var(--fh); font-size:1.6rem; color:var(--azafran); margin:0 0 12px; line-height:1.1}
+  .revel{text-align:center; padding:26px 18px}
+  .podio{display:grid; gap:10px}
+  .puesto{opacity:0; transform:translateY(12px); transition:opacity .5s, transform .5s; background:var(--pizarra); border:1px solid var(--linea); border-radius:var(--radius); padding:14px; display:grid; gap:4px}
+  .puesto.on{opacity:1; transform:none}
+  .puesto .pn{font-family:var(--fd); color:var(--tiza-3); font-size:1rem; letter-spacing:.06em}
+  .puesto .pq{font-family:var(--fd); font-size:1.5rem; line-height:1.1}
+  .puesto .pp{color:var(--tiza-2)}
+  .puesto .pm{font-family:var(--fd); color:var(--azafran); font-size:1.4rem; font-variant-numeric:tabular-nums}
+  .puesto.oro{border-color:var(--azafran); background:linear-gradient(180deg, rgba(239,182,59,.14), rgba(239,182,59,.03))}
+  .puesto.oro .pn{color:var(--azafran)} .puesto.oro .pq{font-size:2rem; color:var(--tiza)} .puesto.oro .pm{font-size:2rem}
+  .puesto img{width:min(100%,260px); aspect-ratio:4/3; object-fit:cover; border-radius:8px; margin:6px auto 2px; border:1px solid var(--linea)}
   .categorias{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-top:16px}
   .cat{background:var(--pizarra-2); border:1px solid var(--linea); border-radius:8px; padding:12px}
   .cat .label{margin-bottom:4px}
@@ -236,6 +248,7 @@
         <li><span class="n">2</span><div><b>Inscribe tu plato aquí antes del jueves 17 a las 23:59</b> con tu nombre, cómo lo presentas y una foto. Después se cierra la inscripción para saber cuántas tapas hay que preparar. Las tapas quedan en secreto: nadie las ve hasta que el anfitrión dé comienzo al concurso.</div></li>
         <li><span class="n">3</span><div><b>La votación es anónima.</b> Cuando empiece la cata, cada persona puntúa todos los platos menos el suyo. Nadie ve qué nota ha puesto cada cual ni de quién es cada tapa.</div></li>
         <li><span class="n">4</span><div><b>Cuando todo el mundo haya votado,</b> el anfitrión publica los resultados: nombres, medias y la tapa ganadora.</div></li>
+        <li><span class="n">5</span><div><b>Hay premio para la tapa ganadora.</b> Y mención especial para el jurado más duro y el más generoso.</div></li>
       </ol>
     </div>
 
@@ -283,7 +296,7 @@
           <span class="ayuda">Esto es lo que verán los demás antes de votar. No pongas tu nombre aquí si quieres mantener el misterio.</span>
         </div>
         <div class="campo">
-          <label for="f-foto">Foto del plato</label>
+          <label for="f-foto">Foto del plato (obligatoria)</label>
           <div class="foto-zona">
             <div class="foto-prev" id="foto-prev">Sin foto todavía</div>
             <input type="file" id="f-foto" accept="image/*">
@@ -357,12 +370,22 @@
         <div class="lista-personas" id="res-quien" style="margin-top:12px"></div>
       </div>
     </div>
+    <div id="res-revelacion" hidden>
+      <div class="bloque revel">
+        <p class="mano" id="rev-titulo">Y los resultados son…</p>
+        <div class="podio" id="rev-podio"></div>
+        <div class="fila der" style="margin-top:14px"><button class="btn-lin btn-peq" type="button" id="rev-saltar">Saltar</button></div>
+      </div>
+    </div>
     <div id="res-abierto" hidden>
       <div class="ganador" id="ganador"></div>
       <h2>Clasificación</h2>
       <div class="ranking" id="ranking"></div>
       <h2 style="margin-top:20px">Por categorías</h2>
       <div class="categorias" id="categorias"></div>
+      <h2 style="margin-top:20px">El jurado</h2>
+      <div class="categorias" id="jurado"></div>
+      <div class="fila" style="margin-top:16px"><button class="btn-sec btn-peq" type="button" id="rev-repetir">Volver a ver la revelación</button></div>
     </div>
 
     <div class="bloque plano" style="margin-top:22px">
@@ -416,7 +439,7 @@ const EVENTO = {
   hora: "a las 20:00 h",           // Déjalo vacío si no quieres mostrarlo.
   cierreInscripcion: "2026-09-17T23:59:59+02:00", // Jueves 17 de septiembre a las 23:59 (hora de España). Después nadie nuevo puede inscribirse.
   cierreTexto: "jueves 17 a las 23:59",
-  codigoAnfitrion: "VINATEROS",    // Código para el panel del anfitrión. Cámbialo.
+  codigoAnfitrion: "VINATEROS1998*", // Código para el panel del anfitrión.
 };
 
 /* Pega aquí la configuración de tu proyecto de Firebase (ver LEEME.md).
@@ -574,6 +597,7 @@ $("#form-insc").addEventListener("submit", async e => {
   const id = editando ? yo : uid();
   const previo = editando ? D.participantes[yo] : null;
   const p = { nombre, plato, desc, pin, foto: fotoActual || (previo && previo.foto) || "", creado: previo ? previo.creado : Date.now() };
+  if (!p.foto) { $("#f-foto").focus(); return toast("Añade una foto de tu tapa para inscribirla."); }
   const btn = $("#btn-inscribir"); btn.disabled = true;
   try {
     await almacen.guardarParticipante(id, p);
@@ -683,6 +707,7 @@ function render(){
    FICHA DE PUNTUACIÓN
    ========================================================== */
 const sumaVoto = s => CRITERIOS.reduce((t,c) => t + (Number(s[c.k]) || 0), 0);
+let fichaTocada = false;
 
 function abrirFicha(id){
   const p = D.participantes[id]; if (!p) return;
@@ -694,8 +719,9 @@ function abrirFicha(id){
       <input type="range" min="1" max="10" step="1" value="${prev[c.k] || 5}" id="r-${c.k}" aria-label="${c.n}">
       <div class="escala"><span>1 · flojo</span><span>5</span><span>10 · de matrícula</span></div>
     </div>`).join("");
+  fichaTocada = Object.keys(prev).length > 0; // si ya había voto, no hace falta confirmar
   const actualizar = () => { let t = 0; CRITERIOS.forEach(c => { const val = Number($("#r-" + c.k).value); $("#n-" + c.k).textContent = val; t += val; }); $("#ficha-total").textContent = t; };
-  CRITERIOS.forEach(c => $("#r-" + c.k).addEventListener("input", actualizar)); actualizar();
+  CRITERIOS.forEach(c => $("#r-" + c.k).addEventListener("input", () => { fichaTocada = true; actualizar(); })); actualizar();
   $("#votar-lista").hidden = true; $("#votar-ficha").hidden = false; window.scrollTo({top:0});
 }
 $("#btn-volver").addEventListener("click", () => { $("#votar-ficha").hidden = true; $("#votar-lista").hidden = false; platoEnFicha = null; });
@@ -704,6 +730,13 @@ $("#form-voto").addEventListener("submit", async e => {
   if (!yo || !platoEnFicha) return;
   if (!cataAbierta()) return toast("La votación no está abierta.");
   const s = {}; CRITERIOS.forEach(c => s[c.k] = Number($("#r-" + c.k).value));
+  if (!fichaTocada && confirmarPendiente !== "voto:" + platoEnFicha) {
+    confirmarPendiente = "voto:" + platoEnFicha;
+    toast("No has movido ninguna nota: todo se quedaría en 5. Toca otra vez para guardar igualmente.");
+    setTimeout(() => { if (confirmarPendiente === "voto:" + platoEnFicha) confirmarPendiente = null; }, 4000);
+    return;
+  }
+  confirmarPendiente = null;
   const puntos = {...miVoto(), [platoEnFicha]: s};
   try { await almacen.guardarVoto(yo, {puntos, actualizado: Date.now()}); toast("Puntuación guardada"); $("#btn-volver").click(); render(); }
   catch(err){ toast("No se pudo guardar: " + err.message); }
@@ -725,8 +758,54 @@ function calcular(){
 }
 const f1 = x => (Math.round(x*10)/10).toLocaleString("es-ES", {minimumFractionDigits:1, maximumFractionDigits:1});
 
+/* Revelación por puestos (3.º, 2.º, ganador) la primera vez que este móvil ve los resultados */
+let revelacion = sessionStorage.getItem("tapas.revelado") === "1" ? "hecha" : "pendiente"; // pendiente | curso | hecha
+let revTimers = [];
+function terminarRevelacion(){
+  revTimers.forEach(clearTimeout); revTimers = [];
+  revelacion = "hecha"; sessionStorage.setItem("tapas.revelado", "1");
+  render();
+}
+function revelar(r){
+  revelacion = "curso";
+  $("#res-revelacion").hidden = false; $("#res-abierto").hidden = true; $("#res-bloqueado").hidden = true;
+  const podio = $("#rev-podio"); podio.innerHTML = "";
+  const puestos = r.slice(0, 3).map((p, i) => ({...p, pos: i + 1})).reverse(); // 3.º, 2.º, 1.º
+  const tarjeta = p => `<div class="puesto${p.pos === 1 ? " oro" : ""}"><div class="pn">${p.pos === 1 ? "TAPA GANADORA" : p.pos + ".º PUESTO"}</div>${p.pos === 1 && p.foto ? `<img src="${p.foto}" alt="">` : ""}<div class="pq">${esc(p.nombre)}</div><div class="pp">${esc(p.plato)}</div><div class="pm">${f1(p.total)} <small style="font-size:.7em;color:var(--tiza-3)">/ 50</small></div></div>`;
+  puestos.forEach((p, i) => {
+    revTimers.push(setTimeout(() => {
+      $("#rev-titulo").textContent = p.pos === 1 ? "Y la tapa ganadora es…" : p.pos === 2 ? "En segundo lugar…" : "En tercer lugar…";
+      podio.insertAdjacentHTML("beforeend", tarjeta(p));
+      const el = podio.lastElementChild; requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("on")));
+      window.scrollTo({top: document.body.scrollHeight, behavior: "smooth"});
+    }, 1800 + i * 2600));
+  });
+  revTimers.push(setTimeout(() => { $("#rev-titulo").textContent = "¡Enhorabuena!"; }, 1800 + puestos.length * 2600));
+  revTimers.push(setTimeout(terminarRevelacion, 1800 + puestos.length * 2600 + 3500));
+}
+$("#rev-saltar").addEventListener("click", terminarRevelacion);
+$("#rev-repetir").addEventListener("click", () => { revelacion = "pendiente"; render(); });
+
+function jurado(){
+  // Media de lo que ha puntuado cada persona (total sobre 50), sin revelar a quién
+  const ps = lista();
+  return ps.map(p => {
+    const v = (D.votos[p.id] && D.votos[p.id].puntos) || {};
+    const totales = Object.entries(v).filter(([id]) => id !== p.id && D.participantes[id]).map(([, s]) => sumaVoto(s));
+    return {nombre: p.nombre, n: totales.length, media: totales.length ? totales.reduce((a,b) => a+b, 0) / totales.length : null};
+  }).filter(j => j.media !== null);
+}
+
 function renderResultados(){
   const abiertos = resultadosAbiertos();
+  if (!abiertos && revelacion === "curso") { revTimers.forEach(clearTimeout); revTimers = []; revelacion = "pendiente"; }
+  $("#res-revelacion").hidden = true;
+  if (abiertos && revelacion === "pendiente") {
+    // Espera a tener las tapas cargadas de la nube antes de empezar la revelación
+    if (!lista().length) { $("#res-bloqueado").hidden = true; $("#res-abierto").hidden = true; return; }
+    revelar(calcular()); return;
+  }
+  if (abiertos && revelacion === "curso") { $("#res-revelacion").hidden = false; $("#res-abierto").hidden = true; $("#res-bloqueado").hidden = true; return; }
   $("#res-bloqueado").hidden = abiertos; $("#res-abierto").hidden = !abiertos;
   $("#res-titulo").textContent = cataAbierta() ? "Aún no hay resultados" : "Los resultados se publican el día 19";
   const ps = lista();
@@ -744,7 +823,7 @@ function renderResultados(){
   const g = r[0];
   if (!g) { $("#ganador").innerHTML = "<p>No hay tapas.</p>"; $("#ranking").innerHTML = ""; $("#categorias").innerHTML = ""; return; }
   const empate = r.length > 1 && Math.abs(r[1].total - g.total) < 0.001;
-  $("#ganador").innerHTML = `<span class="sello">${empate ? "Empate en cabeza" : "Tapa ganadora"}</span>
+  $("#ganador").innerHTML = `<span class="sello">${empate ? "Empate en cabeza" : "Tapa ganadora · se lleva el premio"}</span>
     ${g.foto ? `<img src="${g.foto}" alt="${esc(g.plato)}">` : ""}
     <div class="nombre">${esc(g.nombre)}</div>
     <div class="plato-n">${esc(g.plato)}</div>
@@ -763,6 +842,14 @@ function renderResultados(){
     const platos = mejores.length === 1 ? esc(mejores[0].plato) : "Empate";
     return `<div class="cat"><div class="label">Mejor ${c.n.toLowerCase()}</div><div class="q">${nombres}</div><div class="w">${platos} · ${f1(max)}</div></div>`;
   }).join("");
+  const js = jurado();
+  if (js.length >= 2) {
+    const min = Math.min(...js.map(j => j.media)), max = Math.max(...js.map(j => j.media));
+    const duros = js.filter(j => Math.abs(j.media - min) < 0.001).map(j => esc(j.nombre)).join(" y ");
+    const blandos = js.filter(j => Math.abs(j.media - max) < 0.001).map(j => esc(j.nombre)).join(" y ");
+    $("#jurado").innerHTML = `<div class="cat"><div class="label">Jurado más duro</div><div class="q">${duros}</div><div class="w">Ha puntuado de media ${f1(min)} / 50</div></div>
+      <div class="cat"><div class="label">Jurado más generoso</div><div class="q">${blandos}</div><div class="w">Ha puntuado de media ${f1(max)} / 50</div></div>`;
+  } else $("#jurado").innerHTML = "";
 }
 
 /* ==========================================================

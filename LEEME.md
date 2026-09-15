@@ -16,7 +16,7 @@ Al principio del `<script>` de `index.html` está el bloque `EVENTO`:
 
 - `hora`: pon por ejemplo `"a partir de las 14:00"` si quieres que salga.
 - `codigoAnfitrion`: el código para entrar en el panel del anfitrión (pestaña Resultados, abajo).
-  Ahora es `VINATEROS`. Cámbialo por algo que solo sepas tú.
+  Ahora es `VINATEROS1998*`.
 
 ## 2. Crear la base de datos en Firebase (modo nube)
 
