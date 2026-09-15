@@ -172,6 +172,8 @@
   .modo i{display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px; background:var(--azafran)}
   .modo.nube i{background:var(--aceituna)}
   details summary{cursor:pointer; font-weight:800; color:var(--tiza-2)}
+  [hidden]{display:none!important}
+  #anf-panel:not([hidden]){display:grid; gap:10px; margin-top:10px}
   .lista-personas{display:grid; gap:8px}
   .persona{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:8px 10px; background:var(--pizarra); border:1px solid var(--linea); border-radius:8px; flex-wrap:wrap}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -337,7 +339,7 @@
             <div class="fila"><input type="password" id="anf-codigo" style="max-width:200px"><button class="btn-sec btn-peq" type="button" id="anf-entrar">Entrar</button></div>
           </div>
         </div>
-        <div id="anf-panel" hidden style="margin-top:10px; display:grid; gap:10px">
+        <div id="anf-panel" hidden>
           <p class="small" id="anf-fase"></p>
           <div class="fila">
             <button class="btn-peq" type="button" id="anf-empezar">Empezar el concurso</button>
