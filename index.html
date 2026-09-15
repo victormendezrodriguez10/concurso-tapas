@@ -769,15 +769,16 @@ function terminarRevelacion(){
 function revelar(r){
   revelacion = "curso";
   $("#res-revelacion").hidden = false; $("#res-abierto").hidden = true; $("#res-bloqueado").hidden = true;
+  window.scrollTo({top: 0});
   const podio = $("#rev-podio"); podio.innerHTML = "";
   const puestos = r.slice(0, 3).map((p, i) => ({...p, pos: i + 1})).reverse(); // 3.º, 2.º, 1.º
   const tarjeta = p => `<div class="puesto${p.pos === 1 ? " oro" : ""}"><div class="pn">${p.pos === 1 ? "TAPA GANADORA" : p.pos + ".º PUESTO"}</div>${p.pos === 1 && p.foto ? `<img src="${p.foto}" alt="">` : ""}<div class="pq">${esc(p.nombre)}</div><div class="pp">${esc(p.plato)}</div><div class="pm">${f1(p.total)} <small style="font-size:.7em;color:var(--tiza-3)">/ 50</small></div></div>`;
   puestos.forEach((p, i) => {
     revTimers.push(setTimeout(() => {
       $("#rev-titulo").textContent = p.pos === 1 ? "Y la tapa ganadora es…" : p.pos === 2 ? "En segundo lugar…" : "En tercer lugar…";
-      podio.insertAdjacentHTML("beforeend", tarjeta(p));
-      const el = podio.lastElementChild; requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("on")));
-      window.scrollTo({top: document.body.scrollHeight, behavior: "smooth"});
+      // La tarjeta nueva se coloca arriba, bajo el título, para no tener que desplazar la pantalla
+      podio.insertAdjacentHTML("afterbegin", tarjeta(p));
+      const el = podio.firstElementChild; requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("on")));
     }, 1800 + i * 2600));
   });
   revTimers.push(setTimeout(() => { $("#rev-titulo").textContent = "¡Enhorabuena!"; }, 1800 + puestos.length * 2600));
