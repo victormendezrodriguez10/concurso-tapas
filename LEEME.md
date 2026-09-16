@@ -1,6 +1,6 @@
 # Concurso de tapas en Vinateros
 
-Web para el concurso del sábado 19 de septiembre de 2026 en Calle Vinateros, 2 (Arganda del Rey).
+Web para el concurso del sábado 26 de septiembre de 2026 en Calle Vinateros, 2 (Arganda del Rey).
 
 Todo está en `index.html`. Funciona de dos maneras:
 
@@ -76,10 +76,10 @@ con un mensajito.
 El concurso pasa por tres fases. Se cambian desde el **panel del anfitrión** (pestaña Resultados,
 abajo del todo, con tu código) y el cambio llega al momento a todos los móviles.
 
-1. **Inscripción** (desde ya hasta el jueves 17 a las 23:59; después la web cierra sola la inscripción). Cada persona abre el enlace, entra en **Tapas** y se
+1. **Inscripción** (desde ya hasta el miércoles 23 a las 23:59; después la web cierra sola la inscripción). Cada persona abre el enlace, entra en **Tapas** y se
    inscribe con nombre, nombre del plato, presentación, foto y un PIN de 4 cifras. Las tapas de los
    demás no se ven: solo cuántas hay. Cada uno puede editar la suya hasta que empiece el concurso.
-2. **Cata**. El día 19 pulsas **Empezar el concurso**: se cierran las inscripciones, se revelan las
+2. **Cata**. El día 26 pulsas **Empezar el concurso**: se cierran las inscripciones, se revelan las
    tapas (sin decir de quién es cada una) y se abre la ficha de **Votar**. Cada persona puntúa cada
    tapa menos la suya. En Resultados solo se ve quién ha votado ya y a quién le falta.
 3. **Resultados**. Cuando todos han votado pulsas **Publicar resultados** y todo el mundo ve la tapa
